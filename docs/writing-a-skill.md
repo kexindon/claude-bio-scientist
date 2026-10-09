@@ -10,13 +10,14 @@ skills/<skill_name>/
 ```
 
 Directory name = skill name = the `name:` in frontmatter. Use
-`lower_snake_case`.
+`lower-kebab-case` — hyphens, not underscores. (Python files inside
+`scripts/` keep underscores; a hyphen is a minus sign to the interpreter.)
 
 ## Frontmatter
 
 ```yaml
 ---
-name: screen_stats
+name: screen-stats
 description: >
   Compute log-fold changes and empirical FDR for a pooled base- or
   prime-editing sensor screen — RPM normalization, replicate LFC against a
@@ -78,7 +79,7 @@ if not DATA:
 **Lift working code verbatim.** If a notebook already does this correctly and
 has been used for a real order or a published figure, copy the functions into
 `scripts/` unchanged rather than rewriting them. Note the source file at the
-top so the two can be compared later. `pegrna_oligo` does this — its engine
+top so the two can be compared later. `pegrna-oligo` does this — its engine
 came straight out of `pegrna_gga_oligo_order.ipynb`.
 
 **State the environment.** If the skill needs `pegg`, say that it needs

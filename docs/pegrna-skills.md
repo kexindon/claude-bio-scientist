@@ -9,12 +9,12 @@ them, though `/skill-name` works.
 
 | skill | does | reach for it when |
 |---|---|---|
-| [`pegrna_oligo`](#pegrna_oligo) | pegRNA designs → IDT order sheet + annealed duplex maps + product plasmids + Golden Gate bench sheet | ordering or cloning pegRNAs |
+| [`pegrna-oligo`](#pegrna-oligo) | pegRNA designs → IDT order sheet + annealed duplex maps + product plasmids + Golden Gate bench sheet | ordering or cloning pegRNAs |
 | [`anneal`](#anneal) | oligo order sheet → annealed duplex `.dna` | you already have an order sheet |
 | [`gga`](#gga) | oligo order sheet → assembly product plasmid `.dna` | simulating/verifying the cloning |
 | [`sci-plot`](#sci-plot) | publication figure style for matplotlib/seaborn | any figure panel for a paper |
 
-`pegrna_oligo` runs the whole pegRNA path; `anneal` and `gga` are its second and
+`pegrna-oligo` runs the whole pegRNA path; `anneal` and `gga` are its second and
 third steps standalone. All three share one SnapGene writer.
 
 The script paths below use `~/.claude/skills/<name>/`, which is where
@@ -22,12 +22,12 @@ The script paths below use `~/.claude/skills/<name>/`, which is where
 
 ---
 
-## pegrna_oligo
+## pegrna-oligo
 
 PEGG/PRIDICT design table → everything needed to order and clone.
 
 ```bash
-python ~/.claude/skills/pegrna_oligo/scripts/pegrna_oligo.py DESIGNS.csv -o OUTDIR \
+python ~/.claude/skills/pegrna-oligo/scripts/pegrna_oligo.py DESIGNS.csv -o OUTDIR \
     --file-name my_order \
     --group-col gene_group --order CH,AML \
     --group 'CH=UPEC-tevo:/path/UPEC_tevo.dna' \
@@ -72,7 +72,7 @@ follow in order-sheet row order (`P_T, P_B, E_T, E_B`), so design *k* uses
 `N+4k .. N+4k+3`. Omit it to label by oligo name instead.
 
 Also available standalone from an existing order:
-`python ~/.claude/skills/pegrna_oligo/scripts/gga_plan.py REPORT.csv -o OUTDIR --start-tube 79`
+`python ~/.claude/skills/pegrna-oligo/scripts/gga_plan.py REPORT.csv -o OUTDIR --start-tube 79`
 
 When designs span two backbones the GGA master mix is split into one column per
 vector — they are physically separate mixes, so one pooled column would be wrong

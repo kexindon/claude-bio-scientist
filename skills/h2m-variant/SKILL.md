@@ -1,5 +1,5 @@
 ---
-name: h2m_variant
+name: h2m-variant
 description: >-
   Convert variants between human and mouse at codon resolution with the local
   bioh2m package, and triage each into H2M class 0-6 so you know which can
@@ -8,11 +8,11 @@ description: >-
   in mice", "run H2M on this MAF", "which of these can I make a mouse for",
   "is this base-editable in mouse", "mouse ortholog and canonical transcript".
   Also does mouse-to-human and paralogs. Not for pegRNA design
-  (library_design), cohort frequency (cohort_analysis), or
+  (library-design), cohort frequency (cohort-analysis), or
   genotyping primers (genotyping).
 ---
 
-# h2m_variant — human variant in, mouse variant out, with a verdict
+# h2m-variant — human variant in, mouse variant out, with a verdict
 
 ## The class system: read this first
 
@@ -50,13 +50,13 @@ Two rules that are not obvious and will bite you:
 Use for anything that is "the same variant, in the other species, at nucleotide
 resolution" — or for the prior question of whether that is even possible.
 
-Not for: pegRNA/sgRNA design and designability (`library_design`); cohort
+Not for: pegRNA/sgRNA design and designability (`library-design`); cohort
 frequency, recurrence, or the published **human2mouse.com** database
 (`cohort_query` — "look this up in H2M" is ambiguous and may mean the website,
 so ask); genotyping primers for the finished allele (`genotyping`); sequencing
-readouts (`ngs_screen`, `screen_stats`).
+readouts (`ngs-screen`, `screen-stats`).
 
-This skill **ends by writing a CSV** and naming `library_design` as the next
+This skill **ends by writing a CSV** and naming `library-design` as the next
 step. "Model these in mouse and design the pegRNAs" is one task to the user but
 two skills in two conda environments — say so rather than stopping silently.
 
@@ -67,12 +67,12 @@ two skills in two conda environments — say so rather than stopping silently.
 ```bash
 pip install bioh2m          # 1.0.0 verified here; the lab cluster env pins python=3.10
 export LAB_DATA_ROOT=~/Documents/GitHub/Database
-python ~/.claude/skills/h2m_variant/scripts/h2m_refs.py      # verify the tree
+python ~/.claude/skills/h2m-variant/scripts/h2m_refs.py      # verify the tree
 ```
 
 This is **a separate environment from `pegg`** and cannot be merged with it:
 pegg needs `scikit-learn==1.1.1` with `numpy<2` for its pickled scoring models,
-bioh2m wants `numpy>=1.24.2`. The hand-off to `library_design` is therefore a
+bioh2m wants `numpy>=1.24.2`. The hand-off to `library-design` is therefore a
 file on disk, not an import.
 
 Reference data, all under `$LAB_DATA_ROOT` (verified present on disk):
@@ -158,13 +158,13 @@ python scripts/h2m_triage.py RUN_result.csv --show 7     # every alternative for
 Prints the class table with counts, flags `match == False`, flags variants in
 poorly conserved local context, and writes `FINAL_modeled_variants.csv` —
 classes 0/1 only, `match == False` excluded, just the columns the design step
-needs. Hand that path to `library_design`.
+needs. Hand that path to `library-design`.
 
 ## Single variant, interactively
 
 ```python
 import bioh2m as h2m, sys
-sys.path.insert(0, "~/.claude/skills/h2m_variant/scripts")
+sys.path.insert(0, "~/.claude/skills/h2m-variant/scripts")
 import h2m_refs
 rh, ih, rm, im, dbh, dbm = h2m_refs.load_refs(37)      # ~1 min, once per session
 
@@ -202,7 +202,7 @@ reference bases identical, *all* alternate bases identical, and the pair in
 every indel do not. It also returns BE alternatives for variants that were
 already class 0.
 
-It says nothing about whether a PAM is in range — that is `library_design`.
+It says nothing about whether a PAM is in range — that is `library-design`.
 
 ## Figures
 

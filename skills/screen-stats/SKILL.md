@@ -1,5 +1,5 @@
 ---
-name: screen_stats
+name: screen-stats
 description: >-
   Call hits in a pooled base- or prime-editing sensor screen: from a guide x
   sample count matrix to per-guide log2 fold-change and an empirical FDR built
@@ -7,16 +7,16 @@ description: >-
   "compute LFC and FDR", "which guides are enriched or depleted in bone marrow
   / spleen / meninges", "is this guide significant", "why are all my p-values
   1e-4", "why not just use MAGeCK", "re-run without spleen2", "make the
-  LFC-FDR table". Starts at the count matrix, not FASTQs (ngs_screen); plots
+  LFC-FDR table". Starts at the count matrix, not FASTQs (ngs-screen); plots
   the table through sci-plot, not here.
 ---
 
-# screen_stats — counts → LFC → empirical FDR → hit list
+# screen-stats — counts → LFC → empirical FDR → hit list
 
 Three commands. Preflight, run, and (when a replicate is in question) diff.
 
 ```bash
-S=~/.claude/skills/screen_stats/scripts
+S=~/.claude/skills/screen-stats/scripts
 
 python $S/check_inputs.py --config screens.yaml     # before a run, not after
 python $S/run_screen.py   --config screens.yaml --out LFC-FDR
@@ -35,8 +35,8 @@ LFC-FDR/<screen>_LFC_FDR.provenance.json  seed, n_bootstrap, replicate lists, ML
 ## Where the boundaries are
 
 Starts at the count matrix. FASTQs, CRISPResso, sensor-amplicon extraction,
-building the count matrix and running MAGeCK are **`ngs_screen`**. Designing the
-library and its control guides is **`library_design`**. Every figure built from
+building the count matrix and running MAGeCK are **`ngs-screen`**. Designing the
+library and its control guides is **`library-design`**. Every figure built from
 the output table — volcano, waterfall, LFC-vs-editing, tissue heatmap — goes
 through **`sci-plot`**; nothing in this skill defines a figure style. The one
 plot it does draw, the null-distribution QC panel, is deliberately plain and is
@@ -218,7 +218,7 @@ the ones that matter here.
 
 Plain scientific Python. **No `pegg`, no scikit-learn, no pickled models** — this
 skill is *not* under the Python 3.9/3.10 + `scikit-learn==1.1.1` + `numpy<2` pin
-that `library_design` and `h2m_variant` live with. Run it in whatever modern env
+that `library-design` and `h2m-variant` live with. Run it in whatever modern env
 you like.
 
 Verified end to end on Python 3.9.6 with numpy 1.26.4, pandas 2.2.2, scipy

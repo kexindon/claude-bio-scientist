@@ -136,7 +136,7 @@ alternative: the null comes from the library's own control guides, per tissue an
 per screen, with no parametric model imposed.
 
 So "why does MAGeCK call so many hits" is answered by *this skill*, but running
-MAGeCK itself is STEP 8 and belongs to `ngs_screen`.
+MAGeCK itself is STEP 8 and belongs to `ngs-screen`.
 
 ## Reference shape
 

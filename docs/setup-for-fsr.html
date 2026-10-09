@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab Server Setup</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #f7f7f5;
+    --border: #e3e2de;
+    --text: #1a1a18;
+    --muted: #6b6a66;
+    --accent: #2563a8;
+    --accent-soft: #eaf1f9;
+    --warn-bg: #fdf6e7;
+    --warn-border: #e0bb62;
+    --code-bg: #f4f4f1;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  }
+  :root:not([data-theme="light"]) {
+    @media (prefers-color-scheme: dark) {
+      --bg: #1b1b19;
+      --surface: #232320;
+      --border: #38372f;
+      --text: #ececdf;
+      --muted: #a3a197;
+      --accent: #7fb0e0;
+      --accent-soft: #1e2d3d;
+      --warn-bg: #2e2715;
+      --warn-border: #8a6f2a;
+      --code-bg: #26251f;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #1b1b19; --surface: #232320; --border: #38372f; --text: #ececdf;
+    --muted: #a3a197; --accent: #7fb0e0; --accent-soft: #1e2d3d;
+    --warn-bg: #2e2715; --warn-border: #8a6f2a; --code-bg: #26251f;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 56px 16px 96px; }
+
+  header { border-bottom: 1px solid var(--border); padding-bottom: 28px; margin-bottom: 40px; }
+  h1 { font-size: 30px; line-height: 1.2; margin: 0 0 10px; letter-spacing: -0.02em; }
+  .sub { color: var(--muted); margin: 0; font-size: 16px; }
+
+  h2 {
+    font-size: 13px; text-transform: uppercase; letter-spacing: 0.09em;
+    color: var(--muted); margin: 52px 0 18px; font-weight: 600;
+  }
+  h3 { font-size: 18px; margin: 32px 0 10px; letter-spacing: -0.01em; }
+  p { margin: 0 0 14px; }
+  a { color: var(--accent); }
+
+  .steps { list-style: none; counter-reset: s; padding: 0; margin: 0; }
+  .steps > li {
+    counter-increment: s; position: relative;
+    padding: 0 0 30px 46px; margin: 0;
+    border-left: 1px solid var(--border);
+  }
+  .steps > li:last-child { border-left-color: transparent; padding-bottom: 8px; }
+  .steps > li::before {
+    content: counter(s);
+    position: absolute; left: -15px; top: -2px;
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--accent); color: #fff;
+    font-size: 14px; font-weight: 600;
+    display: grid; place-items: center;
+  }
+  .steps h3 { margin-top: 0; }
+
+  pre {
+    background: var(--code-bg); border: 1px solid var(--border); border-radius: 7px;
+    padding: 13px 15px; overflow-x: auto; margin: 12px 0;
+    font-family: var(--mono); font-size: 13.5px; line-height: 1.6;
+  }
+  code { font-family: var(--mono); font-size: 0.9em; }
+  p code, li code, td code {
+    background: var(--code-bg); border: 1px solid var(--border);
+    padding: 1px 5px; border-radius: 4px; font-size: 0.87em;
+  }
+  pre code { background: none; border: 0; padding: 0; font-size: inherit; }
+  .cmt { color: var(--muted); }
+
+  .note, .warn {
+    border-radius: 7px; padding: 13px 16px; margin: 16px 0; font-size: 15px;
+  }
+  .note { background: var(--accent-soft); border-left: 3px solid var(--accent); }
+  .warn { background: var(--warn-bg); border-left: 3px solid var(--warn-border); }
+  .note p:last-child, .warn p:last-child { margin-bottom: 0; }
+
+  table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 15px; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; }
+  td:first-child { white-space: nowrap; }
+
+  .ask {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 7px; padding: 16px 18px; margin: 14px 0;
+  }
+  .ask p { margin: 0 0 9px; font-family: var(--mono); font-size: 13.5px; line-height: 1.55; }
+  .ask p:last-child { margin-bottom: 0; }
+  .ask .what { font-family: inherit; font-size: 14px; color: var(--muted); margin-bottom: 11px; }
+
+  footer {
+    margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 14.5px;
+  }
+  @media (max-width: 560px) {
+    .wrap { padding: 36px 16px 72px; }
+    h1 { font-size: 25px; }
+    .steps > li { padding-left: 34px; }
+    .steps > li::before { left: -14px; width: 27px; height: 27px; font-size: 13px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Using the lab compute server</h1>
+  <p class="sub">A one-time setup, about 30 minutes. After this you work on the
+  M1 Max from your own laptop, and ask for analyses in plain English.</p>
+</header>
+
+<h2>What this is</h2>
+
+<p>The lab M1 Max (64 GB RAM, 2 TB) will be sitting in the lab, always on. It
+holds a lot of reference database, AACR-GENIE, MSK-IMPACT, MSK-HEME, COSMIC,
+the human and mouse genomes, GENCODE annotations, and the environments for
+running our analyses.</p>
+
+<p>You connect to it from your own machine. Everything runs on the server, so
+nothing large is ever copied to your laptop and nothing has to be installed
+there beyond a connection tool and an editor.</p>
+
+<p>I have also summarized all kinds of analyses of mine and built them in a
+Claude Code skill, <code>/bio-scientist</code>, for you to use. You can prompt
+by <em>"/bio-scientist, how common is DNMT3A R882H in AML?"</em> to do
+analysis.</p>
+
+<p>This will give you a step-by-step setup of how to run these analyses.</p>
+
+<div class="note">
+  <p><strong>Your account on the server is <code>fsr</code></strong> — you
+  have your own home directory, and the shared reference data is readable by
+  both of us.</p>
+</div>
+
+<h2>Setup</h2>
+
+<ol class="steps">
+
+<li>
+  <h3>Install Tailscale and sign in</h3>
+  <p>Tailscale is how your laptop reaches the lab machine. It works from home,
+  from the office, from a conference — no VPN, no IP addresses to remember.</p>
+  <p>Download it from <a href="https://tailscale.com/download">tailscale.com/download</a>
+  and install it. When it asks you to sign in, choose <strong>Sign in with
+  Google</strong> and use the <strong>lab Gmail account</strong> — Kexin will
+  give you the address and password.</p>
+  <div class="warn">
+    <p>It has to be that account. All the lab machines live under it, so
+    signing in with your MIT address or a personal Google account puts you in
+    a different, empty network and <code>m1max</code> will not appear.</p>
+  </div>
+  <p>Once signed in you should see <code>m1max</code> in the Tailscale menu.</p>
+</li>
+
+<li>
+  <h3>Check you can reach the server</h3>
+  <p>Open Terminal (⌘-Space, type "Terminal") and run:</p>
+<pre><code>ssh fsr@m1max</code></pre>
+  <p>The first time it asks <em>"Are you sure you want to continue
+  connecting?"</em> — type <code>yes</code>. You should land at a prompt on
+  the server. Type <code>exit</code> to come back.</p>
+  <div class="warn">
+    <p>If it says <strong>"tailnet policy does not permit you to SSH as user
+    fsr"</strong>, the access rule has not been applied yet — send Kexin
+    that exact message.</p>
+  </div>
+</li>
+
+<li>
+  <h3>Save yourself the typing</h3>
+  <p>So that <code>ssh m1max</code> works on its own, run this on
+  <em>your laptop</em>:</p>
+<pre><code>cat &gt;&gt; ~/.ssh/config &lt;&lt;'EOF'
+
+Host m1max
+    HostName m1max
+    User fsr
+    ServerAliveInterval 60
+EOF</code></pre>
+  <p>Now <code>ssh m1max</code> connects directly.</p>
+</li>
+
+<li>
+  <h3>Install VS Code and connect through it</h3>
+  <p>A terminal is fine for quick things, but for real work you want an
+  editor: file browser, figures you can actually look at, notebooks.</p>
+  <p>Install <a href="https://code.visualstudio.com/">VS Code</a>, then inside
+  it install the <strong>Remote&nbsp;-&nbsp;SSH</strong> extension
+  (⇧⌘X, search for it).</p>
+  <p>Then press <strong>⇧⌘P</strong>, type <em>Remote-SSH: Connect to
+  Host</em>, and pick <code>m1max</code>. A new window opens — everything in
+  it is running on the server, not your laptop.</p>
+  <div class="note">
+    <p>This is the part worth getting working. From here on, "open a terminal"
+    means the terminal inside that VS Code window (<strong>⌃`</strong>).</p>
+  </div>
+</li>
+
+<li>
+  <h3>Install Claude Code and sign in</h3>
+  <p>In the VS Code terminal <em>(connected to m1max)</em>:</p>
+<pre><code>brew install --cask claude-code
+claude</code></pre>
+  <p>At the Claude prompt, type <code>/login</code> and follow the link to
+  sign in with <strong>your own Claude account</strong>. Everyone uses their
+  own — your work and your history stay yours.</p>
+  <div class="note">
+    <p>This one is <em>not</em> the lab Gmail. Tailscale uses the shared lab
+    account because that is what puts the machines on one network; Claude
+    Code is per-person.</p>
+  </div>
+</li>
+
+<li>
+  <h3>Install the lab's skills</h3>
+  <p>Still in the server terminal:</p>
+<pre><code>mkdir -p ~/Documents/GitHub &amp;&amp; cd ~/Documents/GitHub
+git clone https://github.com/kexindon/claude-bio-scientist.git
+cd claude-bio-scientist
+./install.sh</code></pre>
+  <p>Then tell the tools where the shared data lives:</p>
+<pre><code>cat &gt;&gt; ~/.zshrc &lt;&lt;'EOF'
+export LAB_DATA_ROOT="/Users/Shared/lab-data/Database"
+export LAB_OUTPUT_ROOT="/Users/Shared/lab-data/Output"
+export LAB_INPUT_ROOT="/Users/Shared/lab-data/Input"
+EOF
+source ~/.zshrc</code></pre>
+  <p>Check it worked:</p>
+<pre><code>ls "$LAB_DATA_ROOT/PublicDatabase/"
+<span class="cmt"># should list AACR-GENIE, COSMIC, MSK-HEME, MSK-IMPACT …</span></code></pre>
+  <p>Restart Claude Code so it picks up the skills. Done.</p>
+</li>
+
+</ol>
+
+<h2>What is on the machine</h2>
+
+<p>About 100 GB of reference data under
+<code>/Users/Shared/lab-data/</code>, readable by everyone on the machine.
+You do not download any of it — the tools find it through
+<code>$LAB_DATA_ROOT</code>, which step 6 set up.</p>
+
+<h3>Patient cohorts</h3>
+<table>
+  <tr><th>Dataset</th><th>Versions on disk</th><th>What it answers</th></tr>
+  <tr>
+    <td><strong>AACR-GENIE</strong></td>
+    <td>v13.1, v14.0, v15.0, v16.1, v17.0</td>
+    <td>Pan-cancer variant frequency across ~150k sequenced tumors; the main source for "how common is this mutation"</td>
+  </tr>
+  <tr>
+    <td><strong>MSK-IMPACT</strong></td>
+    <td>2017 release</td>
+    <td>Targeted panel cohort with clinical subtypes</td>
+  </tr>
+  <tr>
+    <td><strong>MSK-HEME</strong></td>
+    <td>heme_msk_impact_2022</td>
+    <td>Heme malignancies — the cohort behind our AML and CH work</td>
+  </tr>
+  <tr>
+    <td><strong>COSMIC</strong></td>
+    <td>v99 (GRCh37)</td>
+    <td>Mutant census and the Cancer Gene Census roles (oncogene / TSG)</td>
+  </tr>
+  <tr>
+    <td><strong>ClinVar</strong></td>
+    <td>2024-02-06 (GRCh37)</td>
+    <td>Clinical significance annotation</td>
+  </tr>
+  <tr>
+    <td><strong>gnomAD</strong></td>
+    <td>v4.1.0, per-gene exports</td>
+    <td>Population allele frequency, for filtering out common variants</td>
+  </tr>
+  <tr>
+    <td><strong>MMRRC</strong></td>
+    <td>Catalog</td>
+    <td>Existing mouse strains — is a model already available</td>
+  </tr>
+</table>
+
+<div class="warn">
+  <p><strong>AACR-GENIE is controlled access</strong> under a data use
+  agreement. It is here for our approved work. See the note further down
+  before sharing anything derived from it outside the lab.</p>
+</div>
+
+<h3>Genomes and annotation</h3>
+<table>
+  <tr><th>Build</th><th>Files</th></tr>
+  <tr><td>Human GRCh37</td><td>Genome FASTA + GENCODE v19 database</td></tr>
+  <tr><td>Human GRCh38</td><td>Genome FASTA + GENCODE v44 database</td></tr>
+  <tr><td>Mouse GRCm39</td><td>Genome FASTA + GENCODE vM33 database</td></tr>
+  <tr><td>Mouse GRCm38</td><td>Genome FASTA (legacy)</td></tr>
+</table>
+<p>The GENCODE databases are what let the tools go from a protein change like
+<em>R273H</em> to exact genomic coordinates and a reading frame. Human↔mouse
+conversion uses the GRCh37 and GRCm39 pairs.</p>
+
+<h3>Variant effect prediction</h3>
+<table>
+  <tr><td><strong>AlphaMissense</strong></td><td>Pathogenicity score for every possible missense substitution</td></tr>
+  <tr><td><strong>SIFT</strong></td><td>Conservation-based tolerance prediction</td></tr>
+  <tr><td><strong>dbNSFP</strong> v5.2a</td><td>Aggregated scores across many predictors (GRCh37)</td></tr>
+</table>
+
+<h3>Lab-generated</h3>
+<table>
+  <tr><td><strong>H2M database</strong></td><td>Precomputed human→mouse variant models, from the H2M paper</td></tr>
+  <tr><td><strong>Homology</strong></td><td>MGI human/mouse ortholog and phenotype tables</td></tr>
+  <tr><td><strong>Output/</strong></td><td>Results from previous analyses — H2M database builds, neoantigen, paralog, ATAC</td></tr>
+</table>
+
+<div class="note">
+  <p>Not sure whether something is here? Just ask — <em>"what GENIE versions
+  do we have?"</em> or <em>"is there a mouse strain for Dnmt3a R882H?"</em>
+  Claude can look.</p>
+</div>
+
+<h2>Using it</h2>
+
+<p>Start Claude in whatever folder you want to work in:</p>
+
+<pre><code>cd ~/Documents/GitHub
+claude</code></pre>
+
+<p>Then ask for what you want. You never name a tool — the right one loads
+from the question.</p>
+
+<div class="note">
+  <p><strong>Not sure what is possible?</strong> Ask
+  <em>"what can you do here?"</em> or <em>"what data do we have?"</em> and
+  Claude will walk you through the toolkit, what each part answers, and how
+  they chain together. Good first question.</p>
+</div>
+
+<div class="ask">
+  <p class="what">Cohort questions. These need nothing from you; the public
+  databases are already on the server.</p>
+  <p>How common is DNMT3A R882H in AML?</p>
+  <p>Pull every B-ALL variant in GENIE v17, ranked by patient count.</p>
+  <p>Which genes co-occur with TP53 in B-ALL, and which are mutually exclusive?</p>
+</div>
+
+<div class="ask">
+  <p class="what">Human variant to mouse model, end to end.</p>
+  <p>Take the top 20 CH mutations by GENIE frequency and tell me<br>which ones can actually be modeled in mouse.</p>
+  <p>Design prime editing pegRNAs for the ones that can, with sensors.</p>
+  <p>Turn that into an IDT order for UPEC-tevo.</p>
+</div>
+
+<div class="ask">
+  <p class="what">Screens and bench data. These need your files on the server.</p>
+  <p>Call hits for bone marrow and spleen from counts_ABE.txt, T0 baseline.</p>
+  <p>Did the edit work? The .ab1 traces are in this folder.</p>
+  <p>Make that a volcano for the paper, Nature single-column width.</p>
+</div>
+
+<h3>What it can do</h3>
+
+<table>
+  <tr><th>Ask about</th><th>What happens</th></tr>
+  <tr><td>Patient cohorts</td><td>Variant frequency, co-occurrence and mutual exclusivity, Cox models, Kaplan-Meier</td></tr>
+  <tr><td>Human → mouse</td><td>Codon-level variant conversion, and whether each one can actually become a mouse</td></tr>
+  <tr><td>Guide design</td><td>Prime-editing pegRNAs and base-editing sgRNAs, with sensors and controls</td></tr>
+  <tr><td>Ordering</td><td>IDT order sheets, annealed duplex maps, in-silico Golden Gate assembly</td></tr>
+  <tr><td>Screen data</td><td>FASTQ → counts → editing rates → log-fold change and FDR</td></tr>
+  <tr><td>Bench readouts</td><td>Sanger <code>.ab1</code> genotyping, FlowJo exports</td></tr>
+  <tr><td>Figures</td><td>Publication styling applied consistently across all of the above</td></tr>
+</table>
+
+<h2>Worth knowing</h2>
+
+<h3>AACR-GENIE is controlled-access data</h3>
+<p>It sits on the server under a data use agreement that governs who may
+access it. It is there for our own approved work. Before sharing results
+derived from it outside the lab, or pointing anyone else at the machine,
+check that it is covered.</p>
+
+<h3>Long jobs keep running when you disconnect</h3>
+<p>Some analyses run for hours. Start one with <code>nohup</code> and it
+survives closing your laptop:</p>
+<pre><code>nohup python long_script.py &gt; run.log 2&gt;&amp;1 &amp;
+tail -f run.log        <span class="cmt"># watch it; ⌃C stops watching, not the job</span></code></pre>
+
+<h3>Don't write to the shared data</h3>
+<p><code>/Users/Shared/lab-data/</code> is readable by everyone and writable
+by Kexin only, on purpose — so no one's script can corrupt the reference data
+that every analysis depends on. Write your results into your own home
+directory.</p>
+
+<h3>If something does not work</h3>
+<table>
+  <tr><td><code>ssh m1max</code> hangs</td><td>Check Tailscale is connected on your laptop and that <code>m1max</code> appears in its menu</td></tr>
+  <tr><td>"tailnet policy does not permit"</td><td>The access rule needs updating — message Kexin</td></tr>
+  <tr><td>A skill does not load</td><td><code>cd ~/Documents/GitHub/claude-bio-scientist &amp;&amp; git pull &amp;&amp; ./install.sh</code>, then restart Claude Code</td></tr>
+  <tr><td>"LAB_DATA_ROOT is not set"</td><td>Run <code>source ~/.zshrc</code>, or redo step 6</td></tr>
+</table>
+
+<footer>
+  <p>Maintained by Kexin. The skills and this guide live at
+  <a href="https://github.com/kexindon/claude-bio-scientist">github.com/kexindon/claude-bio-scientist</a> —
+  <code>git pull</code> on the server picks up anything new.</p>
+</footer>
+
+</div>
+</body>
+</html>

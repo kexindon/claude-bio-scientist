@@ -1,5 +1,5 @@
 ---
-name: ngs_screen
+name: ngs-screen
 description: >-
   Process pooled sensor-screen sequencing data: paired-end FASTQs to per-guide
   counts, CRISPResso2 editing rates, lane- and replicate-merged editing
@@ -9,10 +9,10 @@ description: >-
   a run, run CRISPResso on the sensors, rerun the array tasks that failed,
   merge NGS lanes or replicates, compute editing percentages, build a count
   matrix, debug zero counts or low read assignment. Not for LFC/FDR hit
-  calling (screen_stats) or arrayed single-locus amplicons (genotyping).
+  calling (screen-stats) or arrayed single-locus amplicons (genotyping).
 ---
 
-# ngs_screen — FASTQ → counts → editing tables → count matrix
+# ngs-screen — FASTQ → counts → editing tables → count matrix
 
 ## Where this skill starts and stops
 
@@ -21,22 +21,22 @@ BMC datahub ──► run folder ──► STEP4 ──► STEP5 ──► STEP6
                  counts/        per-guide  CRISPResso  aggregated  editing    count   │
                  classification/ FASTQs    per guide   CSV/sample  tables    matrix   │
                                                                                       ▼
-                                                              screen_stats: LFC, z, p, FDR
+                                                              screen-stats: LFC, z, p, FDR
 ```
 
 **It ends at two files.** The MLE editing tables (`MLE/<condition>.csv`) and the
 count matrix (`*_COUNTS.txt`). LFC, z-scores, empirical p-values, FDR and hit
-calling are the **screen_stats** skill, which reads exactly those two. Do not
+calling are the **screen-stats** skill, which reads exactly those two. Do not
 compute an LFC here.
 
-Neighbours: **library_design** designs the library this skill validates;
+Neighbours: **library-design** designs the library this skill validates;
 **genotyping** is for arrayed single-locus amplicons (same tools, one locus, no
 barcode pool); **sci-plot** styles any figure.
 
 **MAGeCK is deliberately not run.** The count matrix is MAGeCK-shaped and the
 lab's `analysis.md` has the invocation, but MAGeCK was dropped for these screens:
 it collapses guides into gene-level scores and consistently overcalled hits,
-including in noisy tissues. The live path is screen_stats' non-parametric
+including in noisy tissues. The live path is screen-stats' non-parametric
 control-guide null. If someone asks for MAGeCK, say this first.
 
 ## This is not a laptop task
@@ -174,7 +174,7 @@ python scripts/compile_editing.py counts --samples samples.tsv \
     --out ABE_BC_COUNTS.txt --count-col bc_count --editor ABE
 ```
 
-`MLE/<condition>.csv` and `ABE_BC_COUNTS.txt` are what screen_stats reads. Stop
+`MLE/<condition>.csv` and `ABE_BC_COUNTS.txt` are what screen-stats reads. Stop
 here.
 
 ## Environment
@@ -193,7 +193,7 @@ micromamba replaced conda because the conda solver hung for hours.
 
 STEP7/8 are local and need only pandas + numpy. **Do not run them in the pegg
 env** — pegg's Python 3.9/3.10 + `scikit-learn==1.1.1` + `numpy<2` pin belongs to
-library_design and buys you nothing here.
+library-design and buys you nothing here.
 
 Pin CRISPResso2 and record the version in your methods: editing percentages are
 version-dependent, so two people running the same reads months apart can get
@@ -300,7 +300,7 @@ pass `--editor`.
 
 **15. Only two exact spellings collapse to `controlsgRNA`:**
 `non-targeting control` and `safe-targeting control`. Any other spelling leaves
-each control as its own single-guide "gene" and screen_stats has no null to
+each control as its own single-guide "gene" and screen-stats has no null to
 build. `setup_run.py` flags near-misses.
 
 **16. `byproduct_ambiguous` can go negative.** It is a residual
@@ -375,5 +375,5 @@ assets/crispresso_quant_blank.csv   ship this to the cluster for STEP6
 Every engine is lifted verbatim from `fsrlab-sensor-analysis`, with the source
 file and cell named at the top of each script so the two can be diffed and
 cannot drift. The column lists in `compile_editing.py` are copied character for
-character because screen_stats' `attach_editing_info` reads those exact names.
+character because screen-stats' `attach_editing_info` reads those exact names.
 Prose condensed from `fsrlab-sensor-analysis/docs/source/{setup,extraction,analysis}.md`.

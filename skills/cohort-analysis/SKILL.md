@@ -1,5 +1,5 @@
 ---
-name: cohort_analysis
+name: cohort-analysis
 description: >-
   Answers how often a mutation occurs in real patients, and what carrying it
   is associated with. Use for "how common is DNMT3A R882H", "how many AML
@@ -10,7 +10,7 @@ description: >-
   is sci-plot.
 ---
 
-# cohort_analysis — patient cohorts: frequency, co-mutation, outcome
+# cohort-analysis — patient cohorts: frequency, co-mutation, outcome
 
 Two kinds of question, split by **where the data lives**:
 
@@ -50,7 +50,7 @@ export LAB_DATA_ROOT=~/Documents/GitHub/Database
 ### Variant and gene frequency
 
 ```bash
-python ~/.claude/skills/cohort_analysis/scripts/cohort_analysis.py freq \
+python ~/.claude/skills/cohort-analysis/scripts/cohort_analysis.py freq \
     --cohort heme --disease-detailed 'Acute Myeloid Leukemia' \
     --genes DNMT3A,TET2,ASXL1 --classifications LOF -o OUT
 ```
@@ -63,9 +63,9 @@ OUT/provenance.json         cohort, version, build, which column was filtered, t
 
 MAF column names come out intact (`Hugo_Symbol`, `Chromosome`,
 `Start_Position`, `End_Position`, `Variant_Type`, `Reference_Allele`,
-`Tumor_Seq_Allele2`, `HGVSp_Short`), so the table feeds **h2m_variant** or a
+`Tumor_Seq_Allele2`, `HGVSp_Short`), so the table feeds **h2m-variant** or a
 library design step unchanged. This skill does **not** do the H2M rename —
-that adapter belongs to `h2m_variant`, and two copies would drift.
+that adapter belongs to `h2m-variant`, and two copies would drift.
 
 Useful flags: `--classifications LOF` for the nonsense/frameshift/splice
 preset, `--protein-change R882H` (the `p.` prefix is added and stripped both
@@ -308,8 +308,8 @@ zero times, so two empty panels keep their spines in `co-occurrence.pdf`; use
 ## Related skills
 
 **sci-plot** owns every figure's appearance — load it for any plot built from
-the frames here. **h2m_variant** owns human↔mouse conversion and the MAF→H2M
+the frames here. **h2m-variant** owns human↔mouse conversion and the MAF→H2M
 rename; hand it `variant_frequency.csv`. Guide and pegRNA design, and the
-designability verdict, belong to the library-design and `pegrna_oligo` skills:
+designability verdict, belong to the library-design and `pegrna-oligo` skills:
 "most frequent" and "designable" are different queries, and this skill answers
 the first honestly rather than pre-filtering for the second.

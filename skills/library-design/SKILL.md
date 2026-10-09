@@ -1,5 +1,5 @@
 ---
-name: library_design
+name: library-design
 description: >-
   Design prime-editing pegRNAs or base-editing sgRNAs from a variant table
   with PEGG — PAM sites, RTT/PBS lengths, ABE vs CBE, sensor cassettes, silent
@@ -7,10 +7,10 @@ description: >-
   and a per-variant dropout ledger. Use for "design guides for these
   mutations", "make a prime editing library", "ABE or CBE for this variant",
   "add a sensor", "add silent bystanders", "score/rank my pegRNAs". Ends at
-  the design table; for an IDT Golden Gate order sheet use pegrna_oligo.
+  the design table; for an IDT Golden Gate order sheet use pegrna-oligo.
 ---
 
-# library_design — variant table → pegRNA/sgRNA design table
+# library-design — variant table → pegRNA/sgRNA design table
 
 ## Where this skill stops
 
@@ -25,15 +25,15 @@ array synthesis of a whole pool.
 |---|---|
 | guides designed from a mutation list | **this skill** |
 | one pooled-synthesis sequence per pegRNA | **this skill** |
-| an **IDT order sheet** of individually ordered Golden Gate oligos — three annealed duplex pairs per pegRNA, `.dna` maps, cloning | **`pegrna_oligo`** |
-| human variant → mouse orthologue modelling | `h2m_variant` |
-| reading sensor amplicons out of screen FASTQs | `ngs_screen` |
+| an **IDT order sheet** of individually ordered Golden Gate oligos — three annealed duplex pairs per pegRNA, `.dna` maps, cloning | **`pegrna-oligo`** |
+| human variant → mouse orthologue modelling | `h2m-variant` |
+| reading sensor amplicons out of screen FASTQs | `ngs-screen` |
 | plot styling for any figure made here | `sci-plot` |
 
-The discriminator against `pegrna_oligo` is the **synthesis route**, not the
+The discriminator against `pegrna-oligo` is the **synthesis route**, not the
 file format. Pooled/array synthesis = one sequence per pegRNA, ordered as a
 pool, which is what this skill emits. Golden Gate = protospacer + scaffold +
-3'-extension oligos ordered individually and annealed, which is `pegrna_oligo`.
+3'-extension oligos ordered individually and annealed, which is `pegrna-oligo`.
 Hand it `*_designs.csv.gz`.
 
 ## Environment — check it first, every time
@@ -336,7 +336,7 @@ has to be processed from that file by hand. Say so rather than shipping human
 guides into a mouse pool.
 
 **`prime.goldengate_oligos()` is a stub that returns `None`.** The Golden Gate
-path is the `pegrna_oligo` skill, not pegg.
+path is the `pegrna-oligo` skill, not pegg.
 
 **`PEGG2_Score`'s weight dict in the source is dead code.** `peggscore2`
 defines `factor_weights` with round numbers and immediately overwrites them
@@ -362,7 +362,7 @@ Before ordering anything:
 4. **Silent controls**: `silent_controls.py` asserts every codon swap is
    synonymous and every `Reference_Allele` matches the genome. Both assertions
    must pass; a REF mismatch means pegg designed against the wrong sequence.
-5. **Spot-check orientation** on any new data, the same check `pegrna_oligo`
+5. **Spot-check orientation** on any new data, the same check `pegrna-oligo`
    relies on: `protospacer.find(rc(PBS)) >= 0` and `protospacer.find(PBS) < 0`.
 
 Figures made from these tables (score distributions, guides-per-mutation,

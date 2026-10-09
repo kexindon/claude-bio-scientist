@@ -10,7 +10,7 @@ description: >-
   R248Q", "which clones are homozygous", "genotype the colonies", "my
   sequencing came back", "knock-in/HDR efficiency", "what percent LSK",
   "FACS", "fold expansion". Not for FASTQ — amplicon NGS editing
-  quantification is ngs_screen.
+  quantification is ngs-screen.
 ---
 
 # genotyping — arrayed validation: one .ab1 per sample, one gate table per run
@@ -25,14 +25,14 @@ Two bench readouts that answer "did it work", on a per-sample basis:
 
 | You have | Use |
 |---|---|
-| Pooled screen FASTQ, amplicon NGS, CRISPResso2 | **`ngs_screen`** |
-| An exact allele frequency you will publish | **`ngs_screen`** — see *Peak heights are not allele fractions* |
-| A design to make, not validate | `library_design`, `pegrna_oligo` |
+| Pooled screen FASTQ, amplicon NGS, CRISPResso2 | **`ngs-screen`** |
+| An exact allele frequency you will publish | **`ngs-screen`** — see *Peak heights are not allele fractions* |
+| A design to make, not validate | `library-design`, `pegrna-oligo` |
 | A paper figure, not a QC glance | **`sci-plot`** (this skill defers all styling) |
 | Raw `.fcs`, no FlowJo workspace | Not supported. `pip install readfcs` or re-gate in FlowJo and export statistics |
 
 **Arrayed, single-locus, one file per sample.** The moment the readout is a
-pooled library or a FASTQ, it is `ngs_screen` — including when the question
+pooled library or a FASTQ, it is `ngs-screen` — including when the question
 sounds identical ("what's my editing efficiency at R248Q"). The two differ by
 input, not by question.
 
@@ -158,7 +158,7 @@ signal saturation, nearby indels and short read length. They are **only**
 meaningful as a difference from a matched WT/unedited control trace read at the
 same window and frame. Without `--control`, every row is tagged
 `confidence=uncalibrated` and the run prints a warning — honor it. Never quote
-an exact allele frequency from Sanger; that needs amplicon NGS (`ngs_screen`).
+an exact allele frequency from Sanger; that needs amplicon NGS (`ngs-screen`).
 
 **An indel makes everything downstream uninterpretable.** In a non-clonal pool
 an indel puts the two alleles out of register, so from the indel onward every

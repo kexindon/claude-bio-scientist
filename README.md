@@ -62,8 +62,8 @@ h2m_output.csv, with sensors and silent bystanders.
 Turn pegrna_designs.csv into an IDT order for UPEC-tevo.
 ```
 
-That chain is `cohort_analysis` → `h2m_variant` → `library_design` →
-`pegrna_oligo`, and you never have to say any of those names.
+That chain is `cohort-analysis` → `h2m-variant` → `library-design` →
+`pegrna-oligo`, and you never have to say any of those names.
 
 ### Pooled screens
 
@@ -127,15 +127,16 @@ To remove: `./install.sh --uninstall`.
 
 | Skill | Does | Status |
 | --- | --- | --- |
-| `pegrna_oligo` | pegRNA design table → IDT order sheet, with BsmBI/poly-T QC and correct scales | ported |
+| **`bio-scientist`** | **The map — which tool answers which question, how they chain, what data is on the machine** | **entry point** |
+| `pegrna-oligo` | pegRNA design table → IDT order sheet, with BsmBI/poly-T QC and correct scales | ported |
 | `anneal` | Oligo order sheet → annotated SnapGene `.dna` duplex maps | ported |
 | `gga` | In-silico Golden Gate assembly → annotated product plasmid maps | ported |
 | `sci-plot` | Publication figure style for matplotlib/seaborn | ported |
-| `h2m_variant` | Human → mouse variant modeling via `bioh2m` | planned |
-| `cohort_analysis` | GENIE / MSK / COSMIC frequency, co-mutation, Cox PH, Kaplan-Meier | planned |
-| `library_design` | pegRNA and base-editing library design via `pegg` | planned |
-| `ngs_screen` | Sensor screen FASTQ → counts → CRISPResso2 → aggregation | planned |
-| `screen_stats` | LFC, bootstrap null, two-sided empirical FDR | planned |
+| `h2m-variant` | Human → mouse variant modeling via `bioh2m` | planned |
+| `cohort-analysis` | GENIE / MSK / COSMIC frequency, co-mutation, Cox PH, Kaplan-Meier | planned |
+| `library-design` | pegRNA and base-editing library design via `pegg` | planned |
+| `ngs-screen` | Sensor screen FASTQ → counts → CRISPResso2 → aggregation | planned |
+| `screen-stats` | LFC, bootstrap null, two-sided empirical FDR | planned |
 | `genotyping` | Sanger `.ab1` edit calling, flow cytometry readouts | planned |
 
 [`docs/pegrna-skills.md`](docs/pegrna-skills.md) is the detailed reference for
@@ -149,7 +150,7 @@ Designs for the planned skills, with their critiques, are in
 
 ## Two conventions that keep the skills from colliding
 
-**One cohort skill, not two.** `cohort_analysis` covers both the public
+**One cohort skill, not two.** `cohort-analysis` covers both the public
 database query (frequency, co-occurrence) and the patient-level outcome
 analysis (Cox, Kaplan-Meier). Splitting them produced two skills that both
 answered "co-mutation" questions, so Claude could not tell them apart.

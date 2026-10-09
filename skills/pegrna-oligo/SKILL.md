@@ -1,14 +1,14 @@
 ---
-name: pegrna_oligo
+name: pegrna-oligo
 description: Turn a PEGG/PRIDICT pegRNA design table into everything needed to order and clone — an IDT oligo order sheet (Golden Gate protospacer/scaffold/3'-extension oligos with BsmBI QC, dedup and correct IDT scales), the annealed oligo duplex .dna maps, and the in-silico assembly product plasmid .dna maps. Different groups can go into different backbones in one continuously numbered order (e.g. CH into UPEC-tevo, AML into UPEmS-tevo). Use whenever asked to design or order pegRNA oligos, build a pegRNA Golden Gate order, anneal pegRNA oligos, or simulate cloning pegRNAs into UPEmS/UPEC vectors.
 ---
 
-# pegrna_oligo — designs → order sheet → annealed duplexes → plasmids
+# pegrna-oligo — designs → order sheet → annealed duplexes → plasmids
 
 One command covers the whole path from a design table to the bench:
 
 ```bash
-python ~/.claude/skills/pegrna_oligo/scripts/pegrna_oligo.py DESIGNS.csv -o OUTDIR \
+python ~/.claude/skills/pegrna-oligo/scripts/pegrna_oligo.py DESIGNS.csv -o OUTDIR \
     --file-name hsc_pilot_ordered \
     --group-col gene_group --order CH,AML \
     --group 'CH=UPEC-tevo:/path/UPEC_tevo.dna' \
