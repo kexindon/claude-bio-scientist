@@ -1,6 +1,13 @@
 ---
 name: cohort_analysis
-description: Answers how often a mutation occurs in real patients, and what carrying it is associated with. Use for "how common is DNMT3A R882H", "how many AML patients have FLT3-ITD", a bare variant name ("IDH2 R140Q?", "TET2 hotspots"), "pull a B-ALL mutation table", "which genes co-occur with TP53", "is SRSF2 mutually exclusive with SF3B1", "fit a Cox model", "get the hazard ratio", "plot Kaplan-Meier", "redo Figure 2", 突变频率, 多少病人, 共突变, 互斥, 生存分析, 预后, 算一下 HR. Not for figure styling — that is sci-plot.
+description: >-
+  Answers how often a mutation occurs in real patients, and what carrying it
+  is associated with. Use for "how common is DNMT3A R882H", "how many AML
+  patients have FLT3-ITD", a bare variant name ("IDH2 R140Q?", "TET2
+  hotspots"), "pull a B-ALL mutation table", "which genes co-occur with TP53",
+  "is SRSF2 mutually exclusive with SF3B1", "fit a Cox model", "get the hazard
+  ratio", "plot Kaplan-Meier", "redo Figure 2". Not for figure styling — that
+  is sci-plot.
 ---
 
 # cohort_analysis — patient cohorts: frequency, co-mutation, outcome

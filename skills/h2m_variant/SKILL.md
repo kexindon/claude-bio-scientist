@@ -1,6 +1,15 @@
 ---
 name: h2m_variant
-description: Convert variants between human and mouse at codon resolution with the local bioh2m package, and triage each into H2M class 0-6 so you know which can actually become a mouse. Use for "model this human variant in mouse", "mouse equivalent of TP53 R273H", "mouse-ify these mutations", "can this be modeled in mice", "run H2M on this MAF", "which of these can I make a mouse for", "is this base-editable in mouse", "mouse ortholog and canonical transcript", 把这些人类突变转成小鼠的, 这个突变在小鼠里对应什么, 能在小鼠里建模吗, 跑一下 H2M, 哪些能做出小鼠, 找小鼠同源基因. Also does mouse-to-human and paralogs. Not for pegRNA design (library_design), cohort frequency or human2mouse.com (cohort_query), or genotyping primers (genotyping).
+description: >-
+  Convert variants between human and mouse at codon resolution with the local
+  bioh2m package, and triage each into H2M class 0-6 so you know which can
+  actually become a mouse. Use for "model this human variant in mouse", "mouse
+  equivalent of TP53 R273H", "mouse-ify these mutations", "can this be modeled
+  in mice", "run H2M on this MAF", "which of these can I make a mouse for",
+  "is this base-editable in mouse", "mouse ortholog and canonical transcript".
+  Also does mouse-to-human and paralogs. Not for pegRNA design
+  (library_design), cohort frequency (cohort_analysis), or
+  genotyping primers (genotyping).
 ---
 
 # h2m_variant — human variant in, mouse variant out, with a verdict

@@ -1,6 +1,16 @@
 ---
 name: genotyping
-description: Call genome-editing outcomes from Sanger .ab1 traces — editing efficiency, bystander edits and homozygous/heterozygous/WT clone calls at a codon plus nucleotide and amino-acid sequence logos; also turns FlowJo gate-statistic .xls exports into population frequencies, absolute counts and fold expansion. Use for "did the edit work", "editing efficiency", "quantify editing from the ab1", "check for bystander editing", "what fraction is R248Q", "which clones are homozygous", "genotype the colonies", "my sequencing came back", "knock-in/HDR efficiency", "what percent LSK", "FACS", "fold expansion" (编辑效率, 测序结果, 纯合还是杂合, 流式). Not for FASTQ — amplicon NGS editing quantification is ngs_screen.
+description: >-
+  Call genome-editing outcomes from Sanger .ab1 traces — editing efficiency,
+  bystander edits and homozygous/heterozygous/WT clone calls at a codon plus
+  nucleotide and amino-acid sequence logos; also turns FlowJo
+  gate-statistic .xls exports into population frequencies, absolute counts and
+  fold expansion. Use for "did the edit work", "editing efficiency", "quantify
+  editing from the ab1", "check for bystander editing", "what fraction is
+  R248Q", "which clones are homozygous", "genotype the colonies", "my
+  sequencing came back", "knock-in/HDR efficiency", "what percent LSK",
+  "FACS", "fold expansion". Not for FASTQ — amplicon NGS editing
+  quantification is ngs_screen.
 ---
 
 # genotyping — arrayed validation: one .ab1 per sample, one gate table per run

@@ -1,6 +1,14 @@
 ---
 name: screen_stats
-description: Call hits in a pooled base- or prime-editing sensor screen: from a guide x sample count matrix to per-guide log2 fold-change and an empirical FDR built from the library's own control guides. Use whenever asked to "call hits", "compute LFC and FDR", "which guides are enriched or depleted in bone marrow / spleen / meninges", "is this guide significant", "why are all my p-values 1e-4", "why not just use MAGeCK", "re-run without spleen2", "make the LFC-FDR table", 或「算 LFC 和 FDR」、「哪些 guide 富集了」。 Starts at the count matrix, not FASTQs (ngs_screen); plots the table through sci-plot, not here.
+description: >-
+  Call hits in a pooled base- or prime-editing sensor screen: from a guide x
+  sample count matrix to per-guide log2 fold-change and an empirical FDR built
+  from the library's own control guides. Use whenever asked to "call hits",
+  "compute LFC and FDR", "which guides are enriched or depleted in bone marrow
+  / spleen / meninges", "is this guide significant", "why are all my p-values
+  1e-4", "why not just use MAGeCK", "re-run without spleen2", "make the
+  LFC-FDR table". Starts at the count matrix, not FASTQs (ngs_screen); plots
+  the table through sci-plot, not here.
 ---
 
 # screen_stats — counts → LFC → empirical FDR → hit list

@@ -1,6 +1,13 @@
 ---
 name: library_design
-description: Design prime-editing pegRNAs or base-editing sgRNAs from a variant table with PEGG — PAM sites, RTT/PBS lengths, ABE vs CBE, sensor cassettes, silent bystanders, synonymous-codon and safe-targeting controls, efficiency scores, and a per-variant dropout ledger. Use for "design guides for these mutations", "make a prime editing library", "ABE or CBE for this variant", "add a sensor", "add silent bystanders", "score/rank my pegRNAs", "why did my variant drop out" — 设计 pegRNA/sgRNA, 做一个文库, 加 sensor, 打分. Ends at the design table; for an IDT Golden Gate order sheet use pegrna_oligo.
+description: >-
+  Design prime-editing pegRNAs or base-editing sgRNAs from a variant table
+  with PEGG — PAM sites, RTT/PBS lengths, ABE vs CBE, sensor cassettes, silent
+  bystanders, synonymous-codon and safe-targeting controls, efficiency scores,
+  and a per-variant dropout ledger. Use for "design guides for these
+  mutations", "make a prime editing library", "ABE or CBE for this variant",
+  "add a sensor", "add silent bystanders", "score/rank my pegRNAs". Ends at
+  the design table; for an IDT Golden Gate order sheet use pegrna_oligo.
 ---
 
 # library_design — variant table → pegRNA/sgRNA design table

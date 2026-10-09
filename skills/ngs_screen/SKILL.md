@@ -1,6 +1,15 @@
 ---
 name: ngs_screen
-description: Process pooled sensor-screen sequencing data: paired-end FASTQs to per-guide counts, CRISPResso2 editing rates, lane- and replicate-merged editing tables, and a guide count matrix. Covers base-editing (15 nt barcode / 42 nt sensor) and prime-editing extended-barcode (16 nt matching / 55 nt sensor) layouts. Use for: process my screen sequencing data, make a config file for a run, run CRISPResso on the sensors, rerun the array tasks that failed, merge NGS lanes or replicates, compute editing percentages, build a count matrix, debug zero counts or low read assignment. Not for LFC/FDR hit calling (screen_stats) or arrayed single-locus amplicons (genotyping).
+description: >-
+  Process pooled sensor-screen sequencing data: paired-end FASTQs to per-guide
+  counts, CRISPResso2 editing rates, lane- and replicate-merged editing
+  tables, and a guide count matrix. Covers base-editing (15 nt barcode / 42 nt
+  sensor) and prime-editing extended-barcode (16 nt matching / 55 nt sensor)
+  layouts. Use for: process my screen sequencing data, make a config file for
+  a run, run CRISPResso on the sensors, rerun the array tasks that failed,
+  merge NGS lanes or replicates, compute editing percentages, build a count
+  matrix, debug zero counts or low read assignment. Not for LFC/FDR hit
+  calling (screen_stats) or arrayed single-locus amplicons (genotyping).
 ---
 
 # ngs_screen — FASTQ → counts → editing tables → count matrix
