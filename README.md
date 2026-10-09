@@ -13,65 +13,101 @@ runnable by someone who did not write it.
 Open Claude Code in any directory and type the question the way you would say
 it to a labmate. The right skill loads on its own.
 
+Each block below says what data the question runs against, so you know what
+has to be in place before you ask.
+
 ### Clinical and cohort data
+
+*Needs nothing from you — reads the public cohorts already under
+`$LAB_DATA_ROOT/PublicDatabase/`: AACR-GENIE v17, MSK-HEME, COSMIC.*
 
 ```
 How common is DNMT3A R882H in AML?
 What fraction of AML patients carry FLT3-ITD?
-
 Pull every B-ALL variant in GENIE v17 and rank them by patient count.
-Which genes co-occur with TP53 in B-ALL, and which are mutually exclusive?
-Are SRSF2 and SF3B1 mutually exclusive?
-
-Fit a Cox model for DNMT3A + RAD21 double mutants vs either alone.
-Plot Kaplan-Meier for the four-arm stratification and give me the HR.
 Rank the CH genes by clinical frequency so I can pick pilot targets.
+
+Which genes co-occur with TP53 in B-ALL, and which are mutually exclusive?
+Are SRSF2 and SF3B1 mutually exclusive in MSK-HEME?
 ```
 
-Those run against AACR-GENIE and MSK-HEME under `$LAB_DATA_ROOT`, or against
-your own patient table for the survival half. **AACR-GENIE is controlled
-access** — see [Reference data](#reference-data).
+*Survival needs your own patient table — one row per patient with `Sample`,
+`Gene`, `Time_to_OS`, `Censor`. Keep it outside this repo.*
+
+```
+Fit a Cox model for DNMT3A + RAD21 double mutants vs either alone,
+using ~/data/final_data_matrix.RData.
+Plot Kaplan-Meier for the four-arm stratification and give me the HR.
+```
+
+**AACR-GENIE is controlled access** under a data use agreement — see
+[Reference data](#reference-data) before pointing anyone else at it.
 
 ### From a clinical variant to a mouse model
+
+*Starts from the cohorts above; each step hands a CSV to the next. Needs the
+reference genomes and GENCODE databases under `$LAB_DATA_ROOT`, and the
+`pegg_env` environment for the design step.*
 
 ```
 Take the top 20 CH mutations by GENIE frequency and tell me which ones
 can actually be modeled in mouse.
 
 What's the mouse equivalent of TP53 R273H?
-What do these human variants correspond to in mouse, and are they modelable?
+Run H2M on ch_aml_mutations.csv and show me the class breakdown.
 
-Design prime editing pegRNAs for the class 0 and class 1 hits,
-with sensors and silent bystanders.
+Design prime editing pegRNAs for the class 0 and class 1 rows of
+h2m_output.csv, with sensors and silent bystanders.
 
-Turn that design table into an IDT order for UPEC-tevo.
+Turn pegrna_designs.csv into an IDT order for UPEC-tevo.
 ```
 
 That chain is `cohort_analysis` → `h2m_variant` → `library_design` →
 `pegrna_oligo`, and you never have to say any of those names.
 
-### Screens and bench readouts
+### Pooled screens
+
+*Needs raw paired FASTQs on the cluster (`$LABROOT/<run>/`, R1 = sensor,
+R2 = protospacer) plus the library CSV. Hours of SLURM time, not a laptop job.*
 
 ```
-Process the sequencing from last week's screen — config is in the run folder.
-Call hits for bone marrow and spleen, ABE only, T0 baseline.
+Set up the config for run 260413Hem and stage the FASTQs from the BMC datahub.
+Process the sequencing for that run — ABE, 15 nt barcode, 42 nt sensor.
+Rerun the array tasks that failed.
+```
+
+*Then hit calling starts from the count matrix — first two columns `sgRNA`
+and `gene` — plus the library annotation with a `classification` column.*
+
+```
+Call hits for bone marrow and spleen from counts_ABE.txt, ABE only, T0 baseline.
 Which guides are enriched in meninges? Give me LFC and FDR.
 Why are all my p-values exactly 1e-4?
+```
 
-Did the edit work? Here are the .ab1 traces from the colonies.
-What is the editing efficiency, and which clones are homozygous?
-What percent of the population is LSK in this FlowJo export?
+### Bench readouts
+
+*Needs the files your facility sent back: `.ab1` traces for Sanger, or a
+FlowJo gate-statistic `.xls` export.*
+
+```
+Did the edit work? The traces are in MEC_KP_PK_Genotyping_30-1331125458_ab1/.
+What is the editing efficiency at Trp53 R172H, and which clones are homozygous?
+Check for bystander editing in these traces against the WT control.
+What percent of the population is LSK in 08-May-2026.xls?
 ```
 
 ### Figures
 
-Every skill hands plotting to `sci-plot`, so figures look the same wherever
-they come from:
+*Needs a result table from any of the above.*
 
 ```
 Make that a volcano for the paper, Nature single-column width.
 Restyle this to match figure 3c.
 ```
+
+Every skill hands plotting to `sci-plot`, so figures look the same wherever
+they come from.
 
 ## Install
 
