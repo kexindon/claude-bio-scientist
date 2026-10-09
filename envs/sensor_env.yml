@@ -1,0 +1,38 @@
+# Sensor screen extraction environment: FASTQ -> guide counts -> per-guide
+# sensor FASTQs. Used by STEP4 of the NGS pipeline.
+#
+# Replaces the lab's older sensor_lib_sg.yml, which was a full linux-64
+# freeze (every transitive package pinned, plus a `prefix:` pointing at
+# another user's home) and therefore does not solve on Apple Silicon. This
+# version pins only what the pipeline actually depends on.
+#
+#   conda env create -f sensor_env.yml
+#   conda activate sensor_env
+
+name: sensor_env
+
+channels:
+  - conda-forge
+  - bioconda
+
+dependencies:
+  - python=3.11
+  - numpy>=1.24,<2
+  - pandas>=1.5,<2.2
+  - biopython=1.81          # PairwiseAligner behaviour the extractor relies on
+  - python-levenshtein>=0.21
+  - rapidfuzz>=2.15
+  - scipy>=1.9
+  - statsmodels>=0.14        # empirical FDR, multipletests
+  - matplotlib>=3.6
+  - seaborn>=0.12
+  - jupyterlab
+  - ipykernel
+
+# ── Notes ───────────────────────────────────────────────────────────────────
+# CRISPResso2 is NOT here. It pins an older Python and conflicts with this
+# environment -- keep it separate (crispresso_env.yml) and switch between
+# them between pipeline steps, as the lab pipeline already does.
+#
+# Register the kernel:
+#     python -m ipykernel install --user --name sensor_env --display-name "sensor"

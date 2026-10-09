@@ -1,0 +1,36 @@
+# CRISPResso2 environment: per-guide amplicon editing quantification.
+# Used by STEP5 of the NGS pipeline, kept separate from sensor_env because
+# CRISPResso2 pins an older Python and its dependencies conflict.
+#
+#   conda env create -f crispresso_env.yml
+#   conda activate crispresso_env
+#   CRISPResso --version        # record this in your methods
+
+name: crispresso_env
+
+channels:
+  - conda-forge
+  - bioconda
+
+dependencies:
+  - python=3.10
+  - crispresso2=2.3.1      # pinned: editing percentages are version-dependent
+  - jinja2
+  - pandas>=1.5,<2.2
+  - numpy>=1.24,<2
+
+# ── Why the version is pinned ───────────────────────────────────────────────
+# The lab's older crispresso_env.yml left crispresso2 unpinned, so two people
+# running the same pipeline months apart could get different editing
+# percentages from identical reads, with nothing in the output saying so.
+# Pin it, and record the version in the methods section of anything published.
+#
+# If 2.3.1 is unavailable on your platform, pin whatever version you resolve
+# to and change it here in the same commit, so the repo always states what
+# was actually used.
+#
+# ── Apple Silicon ───────────────────────────────────────────────────────────
+# Some bioconda builds are osx-64 only. If the solve fails on an M-series Mac:
+#     CONDA_SUBDIR=osx-64 conda env create -f crispresso_env.yml
+#     conda activate crispresso_env && conda config --env --set subdir osx-64
+# It then runs under Rosetta 2, which is slower but correct.

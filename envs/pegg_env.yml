@@ -1,0 +1,63 @@
+# Design environment: pegg (pegRNA / base-editing library design) + bioh2m.
+#
+# The version pins here are load-bearing, not preferences:
+#   * pegg's scoring models are pickles built against scikit-learn 1.1.1 and
+#     fail to unpickle on newer versions.
+#   * numpy must stay below 2.x -- 2.x breaks binary compatibility with the
+#     sklearn build and with cyvcf2.
+#   * Those two together cap Python at 3.9/3.10.
+#
+# OptiPrime scoring does NOT run in here. It needs JAX and Python 3.11+, so it
+# lives in optiprime_env.yml and pegg subprocesses into it.
+#
+#   conda env create -f pegg_env.yml
+#   conda activate pegg_env
+
+name: pegg_env
+
+channels:
+  - conda-forge
+  - bioconda
+
+dependencies:
+  - python=3.10
+  - pip
+
+  # pinned: see note above
+  - numpy=1.26.4
+  - scikit-learn=1.1.1
+
+  - pandas>=1.5,<2.1
+  - matplotlib>=3.5
+  - seaborn>=0.11
+  - scipy>=1.9
+  - biopython>=1.81
+  - regex
+  - gffutils>=0.12
+  - pysam>=0.22.1
+  - requests>=2.26
+  - openpyxl
+  - jupyterlab
+  - ipykernel
+
+  - pip:
+      - pegg>=3.1.0
+      - bioh2m>=1.0.3
+      - pybiomart>=0.2
+
+# ── After creating ──────────────────────────────────────────────────────────
+# Register the kernel so notebooks can select it:
+#     python -m ipykernel install --user --name pegg_env --display-name "pegg (3.10)"
+#
+# Verify the pins actually took -- a silent resolver bump is the usual cause
+# of "it worked last month":
+#     python -c "import sklearn, numpy; print(sklearn.__version__, numpy.__version__)"
+#     # expect: 1.1.1 1.26.4
+#
+# Verify the scoring models unpickle (this is what the pin protects):
+#     python -c "from pegg import prime; print('pegg ok')"
+#
+# Known issue: some pegg releases import cyvcf2 at module load even when it is
+# not used. If that import fails, the historical workaround was to comment out
+# `from cyvcf2 import VCF` in the installed pegg/prime.py. Prefer installing
+# cyvcf2 (conda-forge) over patching an installed package.
