@@ -53,8 +53,45 @@ dedup of shared protospacers; IDT scale by length; and a full in-silico assembly
 whose product must contain `CACC spacer GTTTTAGAG scaffold GTGC RTT PBS
 [tevopreQ1]` with zero surviving BsmBI sites.
 
-Oligo names are `index_gene_mut_CODE_TAG` (e.g. `7_Trp53_R245W_E_T`), sanitized
-for IDT and trimmed to its 30-character limit.
+### Naming
+
+Oligo names are `index[arch]_gene_mut_CODE_TAG` — `7_Trp53_R245W_E_T`,
+`17t_Tet2_S1412*_E_B`.
+
+**The index identifies the mutation, not the row.** `--index-by mutation` (the
+default) keeps one number per gene+mut, so a pegRNA and its epegRNA are both
+design 17. `--index-seed EARLIER_REPORT.csv` carries the numbering across orders,
+so a mutation ordered in September keeps its index in October. `--index-by row`
+restores the old per-row counter.
+
+Because the index is shared, the **architecture** marker is what distinguishes
+the two arms: `17_…` plain, `17t_…` with the tevopreQ1 motif. Without it the
+plain and tevo `E_B` oligos — which differ only in their downstream overhang
+(`aaaa` vs `cgcg`) — would collide on one name, and two different molecules must
+never share a name on an order sheet. `--vector-code` additionally inserts the
+backbone letter (`17Ct`, C=UPEC / S=UPEmS); the September order uses it because
+its tubes are already labelled that way, new orders do not.
+
+**`*` is kept, not rewritten to `X`.** `Tet2_L35*` is the mutation's actual
+HGVS name. No IDT documentation restricts the name charset, and IDT's own
+bulk-upload parser takes the Name field raw — no validation, no truncation. Set
+`STOP_AS_X = True` (or `stop_as_x=True`) only for a vendor form that rejects it.
+
+Note the asterisk *is* reserved in IDT's **sequence** field, where it denotes a
+phosphorothioate bond — so an `*` in a sequence silently orders a different,
+costlier molecule. That hazard is sequence-side only and is most likely where
+the "IDT forbids `*`" folklore came from.
+
+`IDT_NAME_LIMIT = 30` is a **tube-label budget, not an IDT rule** (the web form
+allows 80). It is kept so old and new sheets agree; raise it per call via
+`limit=` if a label needs the room.
+
+**Plasmid maps get the full vector name, oligos stay compact.** Filed on the
+Desktop as `2_UPEC_Dnmt3a_R878H_tevo.dna`, because a plasmid name is read in
+SnapGene where there is room for it; the same name on an oligo
+(`12_UPEmS_Flt3_D594F595insNS_tevo_P_T` = 36 chars) blows the label budget, so
+oligos keep `12t_Flt3_D594F595insNS_P_T`. Both carry the same index, so they
+cross-reference.
 
 The engine `scripts/pegoligo.py` is lifted **verbatim** from the validated
 notebook `pegrna_gga_oligo_order.ipynb`, so the two cannot drift.

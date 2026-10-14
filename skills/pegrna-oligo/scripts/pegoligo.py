@@ -245,31 +245,83 @@ def idt_scale(length: int) -> str:
 # --- oligo naming ------------------------------------------------------------
 
 IDT_NAME_LIMIT = 30
+"""Name-length budget, a lab choice rather than a published IDT rule.
+
+IDT does not document a name charset or length anywhere; its own bulk-upload
+parser takes the Name field raw, with no validation or truncation, and the web
+form's input allows 80. 30 is kept because it is what fits a tube label and has
+been used for every order so far, so changing it would renumber nothing but
+would make old and new sheets disagree. Raise it per call via `limit=` if a
+label needs the room -- 80 is the form's ceiling.
+
+Note the asterisk IS reserved in IDT's *sequence* field, where it denotes a
+phosphorothioate bond. That hazard is sequence-side only; names are unaffected.
+"""
 
 
-def name_token(text) -> str:
+STOP_AS_X = False
+"""Render a nonsense '*' as 'X' in names.
+
+Default False: the lab reads and writes HGVS, where 'Tet2 L35*' is the mutation's
+actual name and 'L35X' is a different notation. '*' survives into oligo names,
+file names and the report. Set True (or pass stop_as_x=True) only for a vendor
+form that rejects the character -- and never drop it silently, which would make
+R451* read as R451, a missense that does not exist.
+"""
+
+
+def name_token(text, stop_as_x: bool | None = None) -> str:
     """Turn a gene symbol or HGVS protein change into an oligo-name token.
 
-    IDT only accepts letters, digits, '_' and '-', so 'p.R451*' becomes 'R451X'
-    and 'D594_F595insNS' becomes 'D594F595insNS'. Nonsense '*' maps to 'X' rather
-    than being dropped, which would silently make R451* read as R451.
+    Strips the 'p.'/'c.'/'g.' prefix and any punctuation that is not meaningful
+    ('D594_F595insNS' -> 'D594F595insNS'), but keeps the nonsense '*' because it
+    is part of how the mutation is named.
     """
     s = str(text).strip()
     if not s or s.lower() in {"nan", "none"}:
         return ""
     if s[:2].lower() in {"p.", "c.", "g."}:
         s = s[2:]
-    return re.sub(r"[^A-Za-z0-9]+", "", s.replace("*", "X"))
+    as_x = STOP_AS_X if stop_as_x is None else stop_as_x
+    if as_x:
+        s = s.replace("*", "X")
+    # Keep '*'; drop the rest of the punctuation.
+    return re.sub(r"[^A-Za-z0-9*]+", "", s)
 
 
-def name_stem(prefix: str, index: int) -> str:
-    """`prefix_index`, or just `index` when prefix is empty — never a bare '_'."""
+def name_stem(prefix: str, index: int, arch: str = "") -> str:
+    """`prefix_index[arch]`, or just `index[arch]` — never a bare '_'.
+
+    `arch` marks the pegRNA architecture and attaches to the index with no
+    separator ('17t'), because the index identifies the *mutation*: once a
+    pegRNA and its epegRNA share number 17, the architecture is the only thing
+    left to tell their oligos apart, and two different molecules must never
+    share a name on an order sheet.
+    """
     prefix = str(prefix or "").strip().strip("_")
-    return f"{prefix}_{index}" if prefix else str(index)
+    head = f"{index}{arch}"
+    return f"{prefix}_{head}" if prefix else head
+
+
+VECTOR_CODE = {"UPEC": "C", "UPEC-tevo": "C", "UPEmS": "S", "UPEmS-tevo": "S"}
+
+
+def arch_token(epeg: str | None, backbone: str | None = None) -> str:
+    """The marker that follows the index: optional vector letter, then 't'.
+
+    't' means the 3' motif is present (on the oligo or already in the backbone);
+    a plain pegRNA carries no marker, matching the vector name (UPEC vs
+    UPEC-tevo). Passing `backbone` prefixes the vector letter -- 'Ct' for
+    UPEC-tevo -- which the September order uses because its tubes are already
+    labelled that way. New orders leave it off.
+    """
+    vec = VECTOR_CODE.get(str(backbone), "") if backbone else ""
+    return vec + ("" if epeg in (None, "none") else "t")
 
 
 def build_oligo_name(prefix: str, index: int, gene: str, mut: str,
-                     code: str, tag: str, limit: int = IDT_NAME_LIMIT) -> str:
+                     code: str, tag: str, limit: int = IDT_NAME_LIMIT,
+                     arch: str = "") -> str:
     """prefix_index_gene_mut_CODE_TAG, trimmed to IDT's name limit.
 
     `prefix` is optional: NAME="" gives index_gene_mut_CODE_TAG with no leading
@@ -277,7 +329,7 @@ def build_oligo_name(prefix: str, index: int, gene: str, mut: str,
     push past the limit the labels are shortened (mutation first, then gene)
     instead of raising.
     """
-    head, suffix = name_stem(prefix, index), f"_{code}_{tag}"
+    head, suffix = name_stem(prefix, index, arch), f"_{code}_{tag}"
     gene, mut = name_token(gene), name_token(mut)
     budget = limit - len(head) - len(suffix)
     if budget < 0:
@@ -329,6 +381,8 @@ def build_oligos(
     strict: bool = True,
     start_index: int = 1,
     seen: dict[str, str] | None = None,
+    index_map: dict[tuple[str, str], int] | None = None,
+    vector_code: bool = False,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Build IDT-ready oligos for a set of pegRNA designs.
 
@@ -338,9 +392,24 @@ def build_oligos(
     `start_index` offsets the oligo index, and passing a `seen` dict shares the
     dedup table between calls — together they let several backbones be built as
     one continuously numbered order.
+
+    `index_map` makes the index identify the *mutation* rather than the row.
+    Pass a dict and it is filled as `(gene, mut) -> index`; a mutation already
+    in it reuses its number, so the same edit keeps one index across pegRNA and
+    epegRNA architectures and across backbones (Tet2 S1412* is design 17 whether
+    it is built plain or with tevopreQ1). Without it the index is a per-row
+    counter, which numbers the same mutation differently in each arm.
+
+    `vector_code` adds the backbone letter to that marker ('17Ct' rather than
+    '17t'). Only for an order whose tubes are already labelled that way.
     """
     bb = resolve_backbone(backbone)
     epeg = resolve_epeg(bb, epeg)
+    # Only meaningful alongside a mutation-keyed index, where the same number is
+    # reused by both architectures; with a row counter the index is already
+    # unique and the marker would be noise.
+    arch = (arch_token(epeg, bb.name if vector_code else None)
+            if index_map is not None else "")
     cols = COLUMN_PRESETS[columns] if isinstance(columns, str) else columns
     if gene_col != "__preset__":
         cols = replace(cols, gene=gene_col)
@@ -377,9 +446,24 @@ def build_oligos(
     genes = designs[cols.gene].to_numpy() if cols.gene else blanks
     muts = designs[cols.mut].to_numpy() if cols.mut else blanks
 
-    for n, (raw_proto, raw_ext, design_id, gene, mut) in enumerate(
+    for row_n, (raw_proto, raw_ext, design_id, gene, mut) in enumerate(
         zip(proto_series, ext_series, ids, genes, muts), start_index
     ):
+        # The index names the mutation, not the row, when an index_map is given:
+        # look the edit up, and only mint a new number if it has not been seen.
+        if index_map is None:
+            n = row_n
+        else:
+            # Key on the '*'-free form so this run and a seed written under the
+            # older 'X' convention agree on what counts as the same mutation.
+            key_mut = (name_token(gene, stop_as_x=True),
+                       name_token(mut, stop_as_x=True))
+            if key_mut in index_map:
+                n = index_map[key_mut]
+            else:
+                n = max(index_map.values(), default=start_index - 1) + 1
+                index_map[key_mut] = n
+
         proto_in = str(raw_proto)[cols.strip_prefix:]
         ext_in = str(raw_ext)[cols.strip_prefix:]
         spacer, g_note = normalize_protospacer(proto_in, g_start)
@@ -397,18 +481,19 @@ def build_oligos(
         issues = qc_design(spacer, ext, insert_top)
         if issues and strict:
             raise ValueError(
-                f"{name_stem(name, n)} ({design_id}) failed QC:\n  - "
+                f"{name_stem(name, n, arch)} ({design_id}) failed QC:\n  - "
                 + "\n  - ".join(issues)
             )
 
-        stem = build_oligo_name(name, n, gene, mut, "P", "T")[:-4]
+        stem = build_oligo_name(name, n, gene, mut, "P", "T", arch=arch)[:-4]
 
         # entries: (oligo name, sequence, name of the identical oligo already ordered)
         entries: list[tuple[str, str, str | None]] = []
         for d in duplexes:
             code = {"protospacer": "P", "scaffold": "S", "extension": "E"}[d.role]
             for tag, seq in (("T", d.top), ("B", d.bot)):
-                oligo_name = build_oligo_name(name, n, gene, mut, code, tag)
+                oligo_name = build_oligo_name(name, n, gene, mut, code, tag,
+                                              arch=arch)
                 key = seq.upper()
                 duplicate_of = seen.get(key) if dedup else None
                 if duplicate_of is None:

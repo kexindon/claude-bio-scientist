@@ -26,6 +26,7 @@ Use --no-anneal / --no-plasmids to stop after the order sheet.
 from __future__ import annotations
 
 import argparse
+import csv
 import os
 import re
 import sys
@@ -216,13 +217,26 @@ def write_plasmid(outdir: str, stem: str, vector_path: str,
 
 # --------------------------------------------------------------------------
 
-def parse_group(spec: str) -> tuple[str, str, str]:
-    """`CH=UPEC-tevo:/path/map.dna`, or `UPEC-tevo:/path/map.dna` for one group."""
+def parse_group(spec: str) -> tuple[str, str, str, str | None]:
+    """`CH=UPEC:/path/map.dna:none` -> (group, backbone, vector, epeg).
+
+    The trailing `:epeg` is optional and overrides the global --epeg for that
+    group. That is what lets plain and -tevo backbones share one order: a -tevo
+    group must resolve to epeg='backbone' while a plain one needs 'oligo' or
+    'none', so one global value cannot serve both.
+    """
     group, _, rest = spec.partition("=")
     if not rest:
         group, rest = "", spec
+    # Only strip a trailing token that is a known epeg value, so a path
+    # containing a colon is left intact.
+    epeg = None
+    for cand in ("backbone", "oligo", "none"):
+        if rest.endswith(":" + cand):
+            rest, epeg = rest[: -(len(cand) + 1)], cand
+            break
     backbone, _, vector = rest.partition(":")
-    return group, backbone, vector
+    return group, backbone, vector, epeg
 
 
 def main() -> int:
@@ -241,6 +255,19 @@ def main() -> int:
     ap.add_argument("--mut-col", default="HGVSp_m")
     ap.add_argument("--epeg", default=None, help="'oligo'|'none' for plain backbones")
     ap.add_argument("--plate", action="store_true", help="add Well Position")
+    ap.add_argument("--index-by", default="mutation", choices=["mutation", "row"],
+                    help="'mutation' (default): one index per gene+mut, so a "
+                         "pegRNA and its epegRNA share a number. 'row': the old "
+                         "per-row counter, which numbers them separately")
+    ap.add_argument("--vector-code", action="store_true",
+                    help="put the backbone letter in the oligo name (17Ct not "
+                         "17t); for orders whose tubes are already labelled so")
+    ap.add_argument("--index-seed", action="append", default=[],
+                    help="report csv from an earlier order; its gene/mut -> index "
+                         "pairs are reused so numbering is stable across orders")
+    ap.add_argument("--have", action="append", default=[],
+                    help="a previous *_oligos.csv whose tubes are already on hand; "
+                         "matching oligos are kept out of the new order (repeatable)")
     ap.add_argument("--no-anneal", action="store_true")
     ap.add_argument("--no-plasmids", action="store_true")
     ap.add_argument("--gga-plan", action="store_true",
@@ -253,11 +280,11 @@ def main() -> int:
 
     groups = {}
     for spec in args.group:
-        g, backbone, vector = parse_group(spec)
+        g, backbone, vector, epeg = parse_group(spec)
         if vector and not os.path.exists(vector):
             print(f"vector map not found: {vector}", file=sys.stderr)
             return 1
-        groups[g] = {"backbone": backbone, "vector": vector}
+        groups[g] = {"backbone": backbone, "vector": vector, "epeg": epeg}
 
     designs = pd.read_csv(args.designs)
     gcol = args.group_col
@@ -281,15 +308,53 @@ def main() -> int:
 
     # --- order sheet: per group, one continuous numbering, shared dedup ------
     order_parts, report_parts = [], []
+    # Seeding `seen` with oligos already in the freezer makes build_oligos treat
+    # them as duplicates: they land in the report's `reused` column instead of
+    # the order sheet, so an existing tube is never re-ordered.
     seen: dict[str, str] = {}
+    on_hand: dict[str, str] = {}
+    for path in args.have:
+        with open(path, newline="") as handle:
+            for row in csv.DictReader(handle):
+                seq = (row.get("Sequence") or "").strip().upper()
+                if seq:
+                    on_hand.setdefault(seq, row.get("Name", "on hand"))
+    seen.update(on_hand)
+    if on_hand:
+        print(f"{len(on_hand)} oligos already on hand (from --have); "
+              "these will be reused, not re-ordered")
+    # One index_map shared by every group, so a mutation built twice (plain and
+    # tevo) carries one number. --index-seed continues an earlier order's
+    # numbering instead of restarting at 1.
+    index_map: dict[tuple[str, str], int] | None = (
+        {} if args.index_by == "mutation" else None)
+    if index_map is not None:
+        for path in args.index_seed:
+            with open(path, newline="") as handle:
+                for row in csv.DictReader(handle):
+                    # Normalize through name_token: an older report wrote
+                    # 'S1412X' where this run produces 'S1412*', and the two
+                    # must land on the same key or the index would be re-minted.
+                    g = P.name_token(row.get("gene") or "", stop_as_x=True)
+                    m = P.name_token(row.get("mut") or "", stop_as_x=True)
+                    idx = row.get("oligo_index")
+                    if g and idx:
+                        index_map.setdefault((g, m), int(idx))
+        if index_map:
+            print(f"{len(index_map)} mutation indices carried over "
+                  f"(from --index-seed); next new index is "
+                  f"{max(index_map.values()) + 1}")
+
     for grp in order:
         cfg = groups[grp] if gcol else groups[list(groups)[0]]
         subset = designs[designs[gcol] == grp] if gcol else designs
         o, r = P.build_oligos(
-            subset, name=args.name, backbone=cfg["backbone"], epeg=args.epeg,
+            subset, name=args.name, backbone=cfg["backbone"],
+            epeg=cfg.get("epeg") or args.epeg,
             columns=args.columns, gene_col=args.gene_col, mut_col=args.mut_col,
             include_scaffold=False, g_start="prepend", dedup=True, plate=False,
             strict=True, start_index=sum(len(p) for p in report_parts) + 1, seen=seen,
+            index_map=index_map, vector_code=args.vector_code,
         )
         r.insert(0, "Group", grp)
         order_parts.append(o)
@@ -314,11 +379,18 @@ def main() -> int:
 
     # --- annealed duplexes and product plasmids -----------------------------
     by_name = dict(zip(orders["Name"], orders["Sequence"]))
+    # An --have oligo is not in this order sheet at all, so resolve reuse through
+    # the on-hand table too; otherwise the .dna maps cannot be built for any
+    # design whose oligos were already in the freezer.
+    on_hand_by_name = {v: k for k, v in on_hand.items()}
     for row in report.itertuples():                    # restore deduped oligos
         for mapping in (getattr(row, "reused", "") or "").split(","):
             if "->" in mapping:
                 miss, src = (s.strip() for s in mapping.split("->"))
-                by_name.setdefault(miss, by_name[src])
+                seq = by_name.get(src) or on_hand_by_name.get(src)
+                if seq:
+                    by_name.setdefault(miss, seq)
+                    by_name.setdefault(src, seq)
 
     parts = {}
     if args.columns == "pegg" and {"RTT", "PBS"} <= set(designs.columns):
